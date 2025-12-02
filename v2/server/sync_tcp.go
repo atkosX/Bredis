@@ -65,6 +65,7 @@ func RunSyncTCPServer() {
 			if err = respond(cmd, conn); err != nil {
 				log.Println("error responding to command: ", err)
 				break
+                
 			}
 		}
 	}
