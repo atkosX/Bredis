@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func readCmd(conn net.Conn) (*core.BredisCmd, error) {
+func readCmd(conn io.ReadWriter) (*core.BredisCmd, error) {
 
 	var buf []byte = make([]byte, 1024)
 	n, err := conn.Read(buf)
@@ -30,13 +30,13 @@ func readCmd(conn net.Conn) (*core.BredisCmd, error) {
 
 }
 
-func respondError(err error, conn net.Conn){
+func respondError(err error, conn io.ReadWriter){
 	conn.Write([]byte(fmt.Sprintf("-%s\r\n",err)))
 }
 
-func respond(cmd *core.BredisCmd, conn net.Conn) error {
+func respond(cmd *core.BredisCmd, conn io.ReadWriter) error {
 	err:=core.EvalAndRespond(cmd,conn)
-	
+
 	if err!=nil{
 		respondError(err, conn)
 	}

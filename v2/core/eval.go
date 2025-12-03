@@ -2,11 +2,12 @@ package core
 
 import (
 	"errors"
-	"net"
+
+    "io"
 )
 
 
-func evalPING(args []string, conn net.Conn)(error){
+func evalPING(args []string, conn io.ReadWriter)(error){
     var b []byte
 
     if len(args)>=2{
@@ -23,7 +24,7 @@ func evalPING(args []string, conn net.Conn)(error){
     return err
 }
 
-func EvalAndRespond(cmd *BredisCmd, conn net.Conn) error{
+func EvalAndRespond(cmd *BredisCmd, conn io.ReadWriter) error{
     switch cmd.Cmd{
     case "PING":    
         return evalPING(cmd.Args,conn)

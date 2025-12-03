@@ -16,5 +16,5 @@ func setupFlags() {
 func main() {
 	setupFlags()
 	log.Println("Bredis server baking up on ", config.Host, ":", config.Port)
-	server.RunSyncTCPServer()
+	server.RunAsyncTCPServer()
 }
