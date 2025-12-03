@@ -1,27 +1,44 @@
 package server
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"main/config"
+	"main/core"
 	"net"
 	"strconv"
+	"strings"
 )
 
-func readCmnd(conn net.Conn) (string, error) {
+func readCmd(conn net.Conn) (*core.BredisCmd, error) {
 
 	var buf []byte = make([]byte, 1024)
 	n, err := conn.Read(buf)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(buf[:n]), nil
+	tokens,err:=core.DecodeArrayString(buf[:n])
+	if err!=nil{
+		return nil,err
+	}
+
+	return &core.BredisCmd{
+		Cmd:strings.ToUpper(tokens[0]),
+		Args: tokens[1:],
+	},nil
 
 }
 
-func respond(cmnd string, conn net.Conn) error {
-	if _, err := conn.Write([]byte(cmnd)); err != nil {
-		return err
+func respondError(err error, conn net.Conn){
+	conn.Write([]byte(fmt.Sprintf("-%s\r\n",err)))
+}
+
+func respond(cmd *core.BredisCmd, conn net.Conn) error {
+	err:=core.EvalAndRespond(cmd,conn)
+	
+	if err!=nil{
+		respondError(err, conn)
 	}
 	return nil
 
@@ -47,7 +64,7 @@ func RunSyncTCPServer() {
 		log.Println("new connection accepted: ", conn.RemoteAddr(), "total connections: ", conn_clients)
 
 		for {
-			cmd, err := readCmnd(conn)
+			cmd, err := readCmd(conn)
 			if err != nil {
 				conn_clients -= 1
 				conn.Close()
@@ -65,7 +82,6 @@ func RunSyncTCPServer() {
 			if err = respond(cmd, conn); err != nil {
 				log.Println("error responding to command: ", err)
 				break
-                
 			}
 		}
 	}
