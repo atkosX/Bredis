@@ -6,7 +6,12 @@ import (
 	"main/core"
 	"net"
 	"syscall"
+	"time"
 )
+
+var conn_clients int=0
+var cronFreq time.Duration=1 * time.Second
+var lastCleanup time.Time=time.Now()
 
 func RunAsyncTCPServer() error {
 	log.Println("starting async TCP server on", config.Host, config.Port)
@@ -62,6 +67,11 @@ func RunAsyncTCPServer() error {
 	con_clients := 0
 
 	for {
+		if time.Now().After(lastCleanup.Add(cronFreq)){
+			core.DeleteExpiredKeys()
+			lastCleanup=time.Now()
+		}
+
 		nevents, e := syscall.EpollWait(epollFD, events[:], -1)
 		if e != nil {
 			log.Fatal("error waiting for events: ", e)
