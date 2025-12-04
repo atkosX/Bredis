@@ -18,26 +18,26 @@ func readCmd(conn io.ReadWriter) (*core.BredisCmd, error) {
 	if err != nil {
 		return nil, err
 	}
-	tokens,err:=core.DecodeArrayString(buf[:n])
-	if err!=nil{
-		return nil,err
+	tokens, err := core.DecodeArrayString(buf[:n])
+	if err != nil {
+		return nil, err
 	}
 
 	return &core.BredisCmd{
-		Cmd:strings.ToUpper(tokens[0]),
+		Cmd:  strings.ToUpper(tokens[0]),
 		Args: tokens[1:],
-	},nil
+	}, nil
 
 }
 
-func respondError(err error, conn io.ReadWriter){
-	conn.Write([]byte(fmt.Sprintf("-%s\r\n",err)))
+func respondError(err error, conn io.ReadWriter) {
+	conn.Write([]byte(fmt.Sprintf("-%s\r\n", err)))
 }
 
 func respond(cmd *core.BredisCmd, conn io.ReadWriter) error {
-	err:=core.EvalAndRespond(cmd,conn)
+	err := core.EvalAndRespond(cmd, conn)
 
-	if err!=nil{
+	if err != nil {
 		respondError(err, conn)
 	}
 	return nil
