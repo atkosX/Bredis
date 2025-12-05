@@ -8,8 +8,7 @@ import (
 	"syscall"
 	"time"
 )
-
-var conn_clients int=0
+ 
 var cronFreq time.Duration=1 * time.Second
 var lastCleanup time.Time=time.Now()
 
